@@ -1,13 +1,13 @@
 ### My .bashrc
 
-Some say it's crazy to stick to Bash since better shells like zsh or fish exist;
-some say it makes no sense to customize too much one's environment, since
+Some say it is crazy to stick to Bash since better shells like zsh or fish
+exist;some say it makes no sense to customize one's environment too much, since
 setting them up is such a pain. Some say it is folly to hope getting the same
 scripts to work in Linux and BSD environments. Some say the first thing to do
 when setting up a Mac OS install is to replace the Bash 3 install with something
 modern ('some' here including Apple themselves).
 
-I rejected those assertions,; instead, I chose something different; I chose the
+I rejected those assertions; instead, I chose something different; I chose the
 impossible; I chose.. This.
 
 The basic idea is to keep Bash for familiarity, while enabling some sweet
