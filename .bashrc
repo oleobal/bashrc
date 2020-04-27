@@ -215,9 +215,13 @@ if [[ $oleo_bins_in_place -ne 0 ]] ; then
   function oleo_install_bins
   {
     echo "You may use compiled binaries instead of Bash functions for performance."
-    echo "Download & compile them now ?"
-    echo "(To be implemented)"
+    echo "Installing requires Git & DMD or LDC. They'll be placed in $OLEO_CACHE_DIR."
     
+    read -p "Download & compile them now? [y/N] " -r OLEO_REPLY
+    if [[ $OLEO_REPLY =~ ^[Yy]$ ]]
+    then
+      echo "To be implemented"
+    fi
   }
   
 fi

@@ -11,7 +11,7 @@
 		{
 			"name": "get_short_cwd",
 			"targetType": "executable",
-			"mainSourceFile": "source/get_short_cwd.d",
+			"mainSourceFile": "src/get_short_cwd.d",
 			"targetName": "oleo_get_short_cwd"
 		}
 	]

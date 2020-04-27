@@ -2,6 +2,7 @@
 docs.json
 __dummy.html
 docs/
+bin/
 /oleo-bashrc-executables
 oleo-bashrc-executables.so
 oleo-bashrc-executables.dylib
