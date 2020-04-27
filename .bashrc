@@ -3,7 +3,7 @@
 
 # This variable is both used to set the current script version
 # and parsed to determine the upstream version
-OLEO_BASHRC_VERSION=6
+OLEO_BASHRC_VERSION=7
 
 # check for updates to this very script
 # requires cURL and AWK
@@ -267,3 +267,14 @@ bind '"\e[A": history-search-backward'
 bind '"\e[B": history-search-forward'
 bind '"\e[C": forward-char'
 bind '"\e[D": backward-char'
+
+
+# enable bash-completion on Mac OS
+[[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"
+
+# local RC
+LOCALRC=~/.additional_shellrc
+if [[ -f $LOCALRC ]]
+then
+  source $LOCALRC
+fi
