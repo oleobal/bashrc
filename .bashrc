@@ -3,7 +3,7 @@
 
 # This variable is both used to set the current script version
 # and parsed to determine the upstream version
-OLEO_BASHRC_VERSION=7
+OLEO_BASHRC_VERSION=8
 
 # check for updates to this very script
 # requires cURL and AWK
@@ -26,6 +26,23 @@ if [ -z ${OLEO_BASHRC_CHECKED_FOR_UPDATES+x} ]; then
 fi
 
 
+
+ ###### #    # #    #  ####  ##### #  ####  #    #  ####  
+ #      #    # ##   # #    #   #   # #    # ##   # #      
+ #####  #    # # #  # #        #   # #    # # #  #  ####  
+ #      #    # #  # # #        #   # #    # #  # #      # 
+ #      #    # #   ## #    #   #   # #    # #   ## #    # 
+ #       ####  #    #  ####    #   #  ####  #    #  ####  
+
+OLEO_CACHE_DIR="~/.cache/oleo/bashrc"
+mkdir -p "$OLEO_CACHE_DIR/bin"
+PATH="$PATH:$OLEO_CACHE_DIR/bin"
+oleo_bins_in_place=0
+
+
+
+
+
 # color path depending on Git status
 # white  : no git repo
 # green  : clean local git repo
@@ -34,7 +51,9 @@ fi
 # red    : clean repo, diverged from the remote
 # yellow : git repo, in other cases
 # remote info not necessarily up to date
-function get_git_color {
+
+
+function oleo_get_git_color {
 
   status=$(git status 2> /dev/null)
   if [ $? -ne 0 ]; then
@@ -72,8 +91,7 @@ function get_git_color {
   fi
 }
 
-
-terminator="\[$(tput sgr0)\]"
+oleo_terminator="\[$(tput sgr0)\]"
 
 
 
@@ -81,7 +99,7 @@ terminator="\[$(tput sgr0)\]"
 # green  : 0
 # red    : 1
 # yellow : otherwise
-function get_exit_status_color {
+function oleo_get_exit_status_color {
   #(>&2 echo $1)
   if [[ $# != 1 ]]; then
     echo -n ""
@@ -97,7 +115,14 @@ function get_exit_status_color {
 }
 
 
-function get_short_cwd {
+
+
+if type oleo_get_short_cwd > /dev/null 2>&1; then
+  :
+else
+oleo_bins_in_place=1
+
+function oleo_bash_short_cwd {
   currentwd=$1
   breakchars="./-_ "
   caps="QWERTYUIOPASDFGHJKLZXCVBNM"
@@ -150,10 +175,9 @@ function get_short_cwd {
   echo $result
 }
 
-function call_cwd_shortener {
-  pwd=$(pwd)
+function oleo_get_short_cwd {
   if type python3 &>/dev/null; then
-    echo $(python -c """cwd='$pwd'
+    echo $(python -c """cwd='$1'
 breakchars='.-_'
 whitespace=' \t\n'
 caps='QWERTYUIOPASDFGHJKLZXCVBNM'
@@ -179,16 +203,49 @@ for w in words[:-1]:
 	result.append(wResult)
 print('/'.join(result)+'/'+words[-1])""")
   else
-    echo $(get_short_cwd "$pwd")
+    echo $(oleo_bash_short_cwd "$1")
   fi
 }
+fi
 
+
+if [[ $oleo_bins_in_place -ne 0 ]] ; then
+  echo "Some binaries aren't installed, run oleo_install_bins"
+  
+  function oleo_install_bins
+  {
+    echo "You may use compiled binaries instead of Bash functions for performance."
+    echo "Download & compile them now ?"
+    echo "(To be implemented)"
+    
+  }
+  
+fi
+
+
+
+
+  ####  ###### ##### ##### # #    #  ####   ####  
+ #      #        #     #   # ##   # #    # #      
+  ####  #####    #     #   # # #  # #       ####  
+      # #        #     #   # #  # # #  ###      # 
+ #    # #        #     #   # #   ## #    # #    # 
+  ####  ######   #     #   # #    #  ####   ####  
 
 # this is because else the functions before get_exit_status_color might overwrite the status code
-PROMPT_COMMAND="exitstatuscode=\$?"
-PS1="\[\$(get_git_color)\]\$(call_cwd_shortener)$terminator\[\$(get_exit_status_color \"\$exitstatuscode\")\]\$$terminator " # just the path
+PROMPT_COMMAND="oleo_exitstatuscode=\$?"
+PS1="\[\$(oleo_get_git_color)\]\$(oleo_get_short_cwd $(pwd))$oleo_terminator\[\$(oleo_get_exit_status_color \"\$oleo_exitstatuscode\")\]\$$oleo_terminator " # just the path
 #PS1="\u@\h:\[\$(get_git_color)\]\$(get_short_cwd)$terminator\[\$(get_exit_status_color \"\$exitstatuscode\")\]\$$terminator " # uname@hostname:path format
 #PS1="\$(get_short_cwd)\$ " # uncolored version
+
+
+
+
+
+
+
+
+
 
 # color stuff
 
@@ -273,8 +330,8 @@ bind '"\e[D": backward-char'
 [[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"
 
 # local RC
-LOCALRC=~/.additional_shellrc
-if [[ -f $LOCALRC ]]
+OLEO_LOCALRC=~/.additional_shellrc
+if [[ -f $OLEO_LOCALRC ]]
 then
-  source $LOCALRC
+  source $OLEO_LOCALRC
 fi

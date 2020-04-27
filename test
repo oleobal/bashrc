@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+if [[ $1 == "install" ]]; then
+	mv ~/.bashrc ~/.bashrc.old
+	DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+	ln -s $DIR/.bashrc ~/.bashrc
+elif [[ $1 == "revert" ]]; then
+	rm ~/.bashrc
+	mv ~/.bashrc.old ~/.bashrc
+else
+	echo 'Pass "install" or "revert".'
+	exit 1
+fi

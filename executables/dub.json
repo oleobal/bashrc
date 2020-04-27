@@ -1,0 +1,18 @@
+{
+	"authors": [
+		"olivier"
+	],
+	"copyright": "Copyright © 2020, olivier",
+	"description": "Executables for my .bashrc",
+	"license": "proprietary",
+	"name": "oleo-bashrc-executables",
+	
+	"configurations": [
+		{
+			"name": "get_short_cwd",
+			"targetType": "executable",
+			"mainSourceFile": "source/get_short_cwd.d",
+			"targetName": "oleo_get_short_cwd"
+		}
+	]
+}

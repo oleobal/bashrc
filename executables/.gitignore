@@ -1,0 +1,15 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/oleo-bashrc-executables
+oleo-bashrc-executables.so
+oleo-bashrc-executables.dylib
+oleo-bashrc-executables.dll
+oleo-bashrc-executables.a
+oleo-bashrc-executables.lib
+oleo-bashrc-executables-test-*
+*.exe
+*.o
+*.obj
+*.lst
