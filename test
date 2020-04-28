@@ -1,13 +1,19 @@
 #!/usr/bin/env bash
 
-if [[ $1 == "install" ]]; then
-	mv ~/.bashrc ~/.bashrc.old
-	DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-	ln -s $DIR/.bashrc ~/.bashrc
-elif [[ $1 == "revert" ]]; then
-	rm ~/.bashrc
-	mv ~/.bashrc.old ~/.bashrc
+if [[ $# > 1 ]]; then
+	DEST=$2
 else
-	echo 'Pass "install" or "revert".'
+	DEST="~/.bashrc"
+fi
+
+if [[ $1 == "install" ]]; then
+	mv $DEST $DEST.old
+	DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+	ln -s $DIR/.bashrc $DEST
+elif [[ $1 == "revert" ]]; then
+	rm $DEST
+	mv $DEST.old $DEST
+else
+	echo "Usage: ${BASH_SOURCE[0]} <install|revert> [destination]"
 	exit 1
 fi

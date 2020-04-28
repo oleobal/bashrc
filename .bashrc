@@ -11,7 +11,7 @@ OLEO_BASHRC_VERSION=8
 if [ -z ${OLEO_BASHRC_CHECKED_FOR_UPDATES+x} ]; then
   if type curl > /dev/null 2>&1; then
     if type awk > /dev/null 2>&1; then
-      scriptURL="https://tools.richeli.eu/bashrc"
+      scriptURL="https://raw.githubusercontent.com/oleobal/bashrc/master/.bashrc"
       code=$(curl -sIL $scriptURL 2>/dev/null | awk '/HTTP/' | tail -n 1 | awk '{print $2}')
       if [[ code -ge 200 && code -lt 300 ]];then
         distantVersion=$(curl -sL $scriptURL 2>/dev/null | awk '/OLEO_BASHRC_VERSION/' | awk -F '=' '!/#.*OLEO_BASHRC_VERSION/{print $2; exit;}')
@@ -34,7 +34,7 @@ fi
  #      #    # #   ## #    #   #   # #    # #   ## #    # 
  #       ####  #    #  ####    #   #  ####  #    #  ####  
 
-OLEO_CACHE_DIR="~/.cache/oleo/bashrc"
+OLEO_CACHE_DIR="$HOME/.cache/oleo/bashrc"
 mkdir -p "$OLEO_CACHE_DIR/bin"
 PATH="$PATH:$OLEO_CACHE_DIR/bin"
 oleo_bins_in_place=0
@@ -220,7 +220,19 @@ if [[ $oleo_bins_in_place -ne 0 ]] ; then
     read -p "Download & compile them now? [y/N] " -r OLEO_REPLY
     if [[ $OLEO_REPLY =~ ^[Yy]$ ]]
     then
-      echo "To be implemented"
+      if [[ ! -d "$OLEO_CACHE_DIR/source" ]]; then
+        git clone https://github.com/oleobal/bashrc $OLEO_CACHE_DIR/source
+      fi
+      git -C $OLEO_CACHE_DIR/source checkout $OLEO_BASHRC_VERSION > /dev/null 2>&1
+      if [[ $? -ne 0 ]]; then
+        echo "Version $OLEO_BASHRC_VERSION is has no stable release yet, installing master instead"
+      fi
+      $OLEO_CACHE_DIR/source/executables/build release
+      mv $OLEO_CACHE_DIR/source/executables/bin/* $OLEO_CACHE_DIR/bin
+      
+      unset oleo_get_short_cwd
+      unset oleo_install_bins
+      echo "Done!"
     fi
   }
   
@@ -238,7 +250,7 @@ fi
 
 # this is because else the functions before get_exit_status_color might overwrite the status code
 PROMPT_COMMAND="oleo_exitstatuscode=\$?"
-PS1="\[\$(oleo_get_git_color)\]\$(oleo_get_short_cwd $(pwd))$oleo_terminator\[\$(oleo_get_exit_status_color \"\$oleo_exitstatuscode\")\]\$$oleo_terminator " # just the path
+PS1="\[\$(oleo_get_git_color)\]\$(oleo_get_short_cwd \$(pwd))$oleo_terminator\[\$(oleo_get_exit_status_color \"\$oleo_exitstatuscode\")\]\$$oleo_terminator " # just the path
 #PS1="\u@\h:\[\$(get_git_color)\]\$(get_short_cwd)$terminator\[\$(get_exit_status_color \"\$exitstatuscode\")\]\$$terminator " # uname@hostname:path format
 #PS1="\$(get_short_cwd)\$ " # uncolored version
 
@@ -334,7 +346,7 @@ bind '"\e[D": backward-char'
 [[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"
 
 # local RC
-OLEO_LOCALRC=~/.additional_shellrc
+OLEO_LOCALRC="$HOME/.additional_shellrc"
 if [[ -f $OLEO_LOCALRC ]]
 then
   source $OLEO_LOCALRC
