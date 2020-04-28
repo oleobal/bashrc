@@ -3,7 +3,7 @@
 
 # This variable is both used to set the current script version
 # and parsed to determine the upstream version
-OLEO_BASHRC_VERSION=8
+OLEO_BASHRC_VERSION=9
 
 # check for updates to this very script
 # requires cURL and AWK
@@ -11,13 +11,13 @@ OLEO_BASHRC_VERSION=8
 if [ -z ${OLEO_BASHRC_CHECKED_FOR_UPDATES+x} ]; then
   if type curl > /dev/null 2>&1; then
     if type awk > /dev/null 2>&1; then
-      scriptURL="https://raw.githubusercontent.com/oleobal/bashrc/master/.bashrc"
-      code=$(curl -sIL $scriptURL 2>/dev/null | awk '/HTTP/' | tail -n 1 | awk '{print $2}')
-      if [[ code -ge 200 && code -lt 300 ]];then
-        distantVersion=$(curl -sL $scriptURL 2>/dev/null | awk '/OLEO_BASHRC_VERSION/' | awk -F '=' '!/#.*OLEO_BASHRC_VERSION/{print $2; exit;}')
+      oleo_scriptURL="https://raw.githubusercontent.com/oleobal/bashrc/master/.bashrc"
+      oleo_code=$(curl -sIL $oleo_scriptURL 2>/dev/null | awk '/HTTP/' | tail -n 1 | awk '{print $2}')
+      if [[ oleo_code -ge 200 && oleo_code -lt 300 ]];then
+        distantVersion=$(curl -sL $oleo_scriptURL 2>/dev/null | awk '/OLEO_BASHRC_VERSION/' | awk -F '=' '!/#.*OLEO_BASHRC_VERSION/{print $2; exit;}')
         if [[ $distantVersion -gt $OLEO_BASHRC_VERSION ]]; then
           echo "A newer .bashrc version is available (local: $OLEO_BASHRC_VERSION, distant: $distantVersion)"
-          echo "Update at $scriptURL"
+          echo "Update at $oleo_scriptURL"
         fi
       fi
     fi
@@ -91,7 +91,7 @@ function oleo_get_git_color {
   fi
 }
 
-oleo_terminator="\[$(tput sgr0)\]"
+OLEO_TERMINATOR="\[$(tput sgr0)\]"
 
 
 
@@ -235,8 +235,34 @@ if [[ $oleo_bins_in_place -ne 0 ]] ; then
       echo "Done!"
     fi
   }
-  
 fi
+
+
+
+ #####  #####   ####  #    # #####  ##### 
+ #    # #    # #    # ##  ## #    #   #   
+ #    # #    # #    # # ## # #    #   #   
+ #####  #####  #    # #    # #####    #   
+ #      #   #  #    # #    # #        #   
+ #      #    #  ####  #    # #        #   
+
+
+if [[ $USER == "root" ]]; then
+  OLEO_PROMPT_MARKER="#"
+else
+  OLEO_PROMPT_MARKER="\$"
+fi
+
+if [ -z ${SSH_CONNECTION+x} ]; then
+  OLEO_SSH_MARKER=""
+else
+  OLEO_SSH_MARKER="\[$(tput setaf 1)\]*$OLEO_TERMINATOR"
+fi
+
+# this is because else the functions before get_exit_status_color might overwrite the status code
+PROMPT_COMMAND="oleo_exitstatuscode=\$?"
+PS1="$OLEO_SSH_MARKER\[\$(oleo_get_git_color)\]\$(oleo_get_short_cwd \$PWD)$OLEO_TERMINATOR\[\$(oleo_get_exit_status_color \"\$oleo_exitstatuscode\")\]$OLEO_PROMPT_MARKER$OLEO_TERMINATOR " # just the path
+
 
 
 
@@ -247,20 +273,6 @@ fi
       # #        #     #   # #  # # #  ###      # 
  #    # #        #     #   # #   ## #    # #    # 
   ####  ######   #     #   # #    #  ####   ####  
-
-# this is because else the functions before get_exit_status_color might overwrite the status code
-PROMPT_COMMAND="oleo_exitstatuscode=\$?"
-PS1="\[\$(oleo_get_git_color)\]\$(oleo_get_short_cwd \$(pwd))$oleo_terminator\[\$(oleo_get_exit_status_color \"\$oleo_exitstatuscode\")\]\$$oleo_terminator " # just the path
-#PS1="\u@\h:\[\$(get_git_color)\]\$(get_short_cwd)$terminator\[\$(get_exit_status_color \"\$exitstatuscode\")\]\$$terminator " # uname@hostname:path format
-#PS1="\$(get_short_cwd)\$ " # uncolored version
-
-
-
-
-
-
-
-
 
 
 # color stuff
@@ -345,9 +357,18 @@ bind '"\e[D": backward-char'
 # enable bash-completion on Mac OS
 [[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"
 
+# on Linux (or at least the ones I have)
+if ! shopt -oq posix; then
+  if [ -f /usr/share/bash-completion/bash_completion ]; then
+    . /usr/share/bash-completion/bash_completion
+  elif [ -f /etc/bash_completion ]; then
+    . /etc/bash_completion
+  fi
+fi
+
+
 # local RC
 OLEO_LOCALRC="$HOME/.additional_shellrc"
-if [[ -f $OLEO_LOCALRC ]]
-then
+if [[ -f $OLEO_LOCALRC ]]; then
   source $OLEO_LOCALRC
 fi
