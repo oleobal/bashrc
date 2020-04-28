@@ -11,7 +11,9 @@ PREFIX="oleo_"
 
 
 COMPILER="dmd"
-if type ldc > /dev/null 2>&1; then
+if type ldc2 > /dev/null 2>&1; then
+	COMPILER="ldc2"
+elif type ldc > /dev/null 2>&1; then
 	COMPILER="ldc"
 fi
 
