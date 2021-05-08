@@ -3,7 +3,7 @@
 
 # This variable is both used to set the current script version
 # and parsed to determine the upstream version
-OLEO_BASHRC_VERSION=10
+OLEO_BASHRC_VERSION=11
 
 # check for updates to this very script
 # requires cURL and AWK
@@ -223,21 +223,26 @@ if [[ $oleo_bins_in_place -ne 0 ]] ; then
       if [[ ! -d "$OLEO_CACHE_DIR/source" ]]; then
         git clone https://github.com/oleobal/bashrc $OLEO_CACHE_DIR/source
       fi
-      git -C $OLEO_CACHE_DIR/source checkout $OLEO_BASHRC_VERSION > /dev/null 2>&1
+      git -C $OLEO_CACHE_DIR/source pull > /dev/null 2>&1
       if [[ $? -ne 0 ]]; then
-        echo "Version $OLEO_BASHRC_VERSION is has no stable release yet, installing master instead"
-      fi
-      $OLEO_CACHE_DIR/source/executables/build release
-      
-      if [[ $(find $OLEO_CACHE_DIR/source/executables/bin -maxdepth 1 -type f|wc -l) -eq 0 ]]; then
-        echo "Apologies, something went wrong"
-        return 1
+        echo "Git pull failed"
       else
-        mv $OLEO_CACHE_DIR/source/executables/bin/* $OLEO_CACHE_DIR/bin
+        git -C $OLEO_CACHE_DIR/source checkout $OLEO_BASHRC_VERSION > /dev/null 2>&1
+        if [[ $? -ne 0 ]]; then
+          echo "Version $OLEO_BASHRC_VERSION is has no stable release yet, installing master instead"
+        fi
+        $OLEO_CACHE_DIR/source/executables/build release
         
-        unset oleo_get_short_cwd
-        unset oleo_install_bins
-        echo "Done!"
+        if [[ $(find $OLEO_CACHE_DIR/source/executables/bin -maxdepth 1 -type f|wc -l) -eq 0 ]]; then
+          echo "Apologies, something went wrong"
+          return 1
+        else
+          mv $OLEO_CACHE_DIR/source/executables/bin/* $OLEO_CACHE_DIR/bin
+          
+          unset oleo_get_short_cwd
+          unset oleo_install_bins
+          echo "Done!"
+        fi
       fi
     fi
   }
@@ -267,7 +272,7 @@ fi
 
 # this is because else the functions before get_exit_status_color might overwrite the status code
 PROMPT_COMMAND="oleo_exitstatuscode=\$?"
-PS1="$OLEO_SSH_MARKER\[\$(oleo_get_git_color)\]\$(oleo_get_short_cwd \$PWD)$OLEO_TERMINATOR\[\$(oleo_get_exit_status_color \"\$oleo_exitstatuscode\")\]$OLEO_PROMPT_MARKER$OLEO_TERMINATOR " # just the path
+PS1="$OLEO_SSH_MARKER\[\$(oleo_get_git_color)\]\$(oleo_get_short_cwd \"\$PWD\")$OLEO_TERMINATOR\[\$(oleo_get_exit_status_color \"\$oleo_exitstatuscode\")\]$OLEO_PROMPT_MARKER$OLEO_TERMINATOR " # just the path
 
 
 
