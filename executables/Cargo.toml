@@ -1,0 +1,10 @@
+[package]
+name = "oleo-bashrc-executables"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name = "oleo_get_short_cwd"
+path = "src/get_short_cwd.rs"
+
+[dependencies]

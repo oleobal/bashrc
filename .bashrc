@@ -3,28 +3,34 @@
 
 # This variable is both used to set the current script version
 # and parsed to determine the upstream version
-OLEO_BASHRC_VERSION=11
+OLEO_BASHRC_VERSION=12
 
 # check for updates to this very script
 # requires cURL and AWK
 # the OLEO_BASHRC_VERSION variable should have been set before this
-if [ -z ${OLEO_BASHRC_CHECKED_FOR_UPDATES+x} ]; then
+function oleo_check_for_updates {
   if type curl > /dev/null 2>&1; then
-    if type awk > /dev/null 2>&1; then
-      oleo_scriptURL="https://raw.githubusercontent.com/oleobal/bashrc/master/.bashrc"
-      oleo_code=$(curl -sIL $oleo_scriptURL 2>/dev/null | awk '/HTTP/' | tail -n 1 | awk '{print $2}')
-      if [[ oleo_code -ge 200 && oleo_code -lt 300 ]];then
-        distantVersion=$(curl -sL $oleo_scriptURL 2>/dev/null | awk '/OLEO_BASHRC_VERSION/' | awk -F '=' '!/#.*OLEO_BASHRC_VERSION/{print $2; exit;}')
-        if [[ $distantVersion -gt $OLEO_BASHRC_VERSION ]]; then
-          echo "A newer .bashrc version is available (local: $OLEO_BASHRC_VERSION, distant: $distantVersion)"
-          echo "Update at $oleo_scriptURL"
-        fi
-      fi
+   :
+  else
+    echo "Requires curl"
+    return
+  fi
+  if type awk > /dev/null 2>&1; then
+   :
+  else
+    echo "Requires awk"
+    return
+  fi
+  oleo_scriptURL="https://raw.githubusercontent.com/oleobal/bashrc/master/.bashrc"
+  oleo_code=$(curl -sIL $oleo_scriptURL 2>/dev/null | awk '/HTTP/' | tail -n 1 | awk '{print $2}')
+  if [[ oleo_code -ge 200 && oleo_code -lt 300 ]];then
+    distantVersion=$(curl -sL $oleo_scriptURL 2>/dev/null | awk '/OLEO_BASHRC_VERSION/' | awk -F '=' '!/#.*OLEO_BASHRC_VERSION/{print $2; exit;}')
+    if [[ $distantVersion -gt $OLEO_BASHRC_VERSION ]]; then
+      echo "A newer .bashrc version is available (local: $OLEO_BASHRC_VERSION, distant: $distantVersion)"
+      echo "Update at $oleo_scriptURL"
     fi
   fi
-  OLEO_BASHRC_CHECKED_FOR_UPDATES=yes
-fi
-
+}
 
 
  ###### #    # #    #  ####  ##### #  ####  #    #  ####  
@@ -208,6 +214,10 @@ print('/'.join(result)+'/'+words[-1])""")
 }
 fi
 
+function oleo_remove_bins
+{
+  rm -rf $OLEO_CACHE_DIR/bin
+}
 
 if [[ $oleo_bins_in_place -ne 0 ]] ; then
   echo "Some binaries aren't installed, run oleo_install_bins"
@@ -215,7 +225,7 @@ if [[ $oleo_bins_in_place -ne 0 ]] ; then
   function oleo_install_bins
   {
     echo "You may use compiled binaries instead of Bash functions for performance."
-    echo "Installing requires Git & DMD or LDC. They'll be placed in $OLEO_CACHE_DIR."
+    echo "Installing requires Git & the Rust toolchain. They'll be placed in $OLEO_CACHE_DIR."
     
     read -p "Download & compile them now? [y/N] " -r OLEO_REPLY
     if [[ $OLEO_REPLY =~ ^[Yy]$ ]]
@@ -223,7 +233,7 @@ if [[ $oleo_bins_in_place -ne 0 ]] ; then
       if [[ ! -d "$OLEO_CACHE_DIR/source" ]]; then
         git clone https://github.com/oleobal/bashrc $OLEO_CACHE_DIR/source
       fi
-      git -C $OLEO_CACHE_DIR/source pull > /dev/null 2>&1
+      git -C $OLEO_CACHE_DIR/source fetch > /dev/null 2>&1 && git -C $OLEO_CACHE_DIR/source reset origin/master --hard > /dev/null 2>&1
       if [[ $? -ne 0 ]]; then
         echo "Git pull failed"
       else
@@ -231,13 +241,13 @@ if [[ $oleo_bins_in_place -ne 0 ]] ; then
         if [[ $? -ne 0 ]]; then
           echo "Version $OLEO_BASHRC_VERSION is has no stable release yet, installing master instead"
         fi
-        $OLEO_CACHE_DIR/source/executables/build release
+        echo $(cd $OLEO_CACHE_DIR/source/executables/ && cargo build --release)
         
-        if [[ $(find $OLEO_CACHE_DIR/source/executables/bin -maxdepth 1 -type f|wc -l) -eq 0 ]]; then
+        if [[ $(find $OLEO_CACHE_DIR/source/executables/target/release -maxdepth 1 -type f|wc -l) -eq 0 ]]; then
           echo "Apologies, something went wrong"
           return 1
         else
-          mv $OLEO_CACHE_DIR/source/executables/bin/* $OLEO_CACHE_DIR/bin
+          mv $OLEO_CACHE_DIR/source/executables/target/release/* $OLEO_CACHE_DIR/bin
           
           unset oleo_get_short_cwd
           unset oleo_install_bins
@@ -286,6 +296,11 @@ PS1="$OLEO_SSH_MARKER\[\$(oleo_get_git_color)\]\$(oleo_get_short_cwd \"\$PWD\")$
   ####  ######   #     #   # #    #  ####   ####  
 
 
+# aliases
+
+alias gt=git
+
+
 # color stuff
 
 # also adds -h ('human' sizes)
@@ -305,11 +320,7 @@ fi
 # use neovim if it is present
 if type nvim > /dev/null 2>&1; then
   alias vi='nvim'
-fi
-
-# use thefuck if present (as fu)
-if type thefuck > /dev/null 2>&1; then
-  eval $(thefuck --alias fu)
+  export EDITOR=nvim
 fi
   
 # vi-like keybindings
